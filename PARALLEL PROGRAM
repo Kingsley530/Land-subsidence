@@ -1,0 +1,43 @@
+function TL=fanyanbxcs(K)
+global Ob s
+Ob=csvread('地面沉降数列2.xls');
+%Ob=csvread('地面沉降.xls');
+  
+%K0=[0.0001;2100;5100];
+%K0=[1;5;5];
+%K0=[0.5];
+K0=[0.2;4;4];
+%spmd
+   % if labindex==1
+   %     out1=dmcj(0:5,0:5,K);
+    %else if labindex==2
+     %       out2=dmcj(0:5,6:10,K);            
+      %  else if labindex==3
+         %       out3=dmcj(6:10,0:5,K);
+         %   else
+      %  out4=dmcj(6:10,6:10,K);
+  % end
+      %  end
+  %  end
+%end
+
+%P1=out1{1};
+%P2=out2{2};
+%P3=out3{3};
+%P4=out4{4};
+%P=out1{1}+out2{2}+out3{3}+out4{4};
+%P=10080*dmcjtime(0,0,K);
+P=1000*dmcjtime(0,0,K);
+
+%P=dmcjtime(Eta);
+
+Res=0;
+NPOINT=1;
+LAY=10;
+for I=1
+    for L=1:LAY+1;
+        Res=Res+(P(L,I)-Ob(L,I))*(P(L,I)-Ob(L,I));
+    end
+end
+TL=(1-s)*(Res)+s*dot(K-K0,K-K0);
+ 
