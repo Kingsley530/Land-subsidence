@@ -1,1 +1,299 @@
+function ANS=dmcjtime(NUM1,NUM2,K)
+K0=[0.2;4;4];
+global Ob s
+%profile on
+LAY=10;
+
+
+%KX=0.000864;
+%KX=0.00001;
+%KX=1.12;
+%KY=1.12;
+%KZ=1.12;
+KX=0.00006;
+KY=0.00006;
+KZ=0.00006;
+DZ=0.16;
+
+A=5;
+B=5;
+
+
+%T=[1000;1500;2000;2500;3000;3500;4000;4500;5000;5500;6000;6500;7000;7500;8000;8500;9000;9500;10000];
+%T=[15000;20000;25000;30000;35000;40000;45000;50000;55000;60000;65000;70000;75000;80000;85000;90000;95000;100000];
+%T=[100;200;300;400;500;600;700;800;900;1000];
+%T=[0;10;20;30;40;50;60;70;80;90];
+%T=[0.1;0.3;0.5;0.7;1;3;5];
+%T=[7;10;30;50;70;90];
+%T=1000:500:10000;
+%T=15000:5000:100000;
+T=0:10:200;
+%T=200:100:900;
+%T=100000:5000:150000;
+%T=155000:5000:200000;
+%T=200000:5000:230000;
+
+for i=1:21;
+%for i=1:6;
+%DT(i)=100;    
+DT(i)=1;
+%DT(i)=10;
+%DT(i)=0.01;
+%DT(i)=100;
+
+      NSTEP(i)=T(i)./DT(i);
+
+      
+NPOINT =1;
+
+U=zeros(LAY+1,NPOINT);
+V=zeros(LAY+1,NPOINT);
+W=zeros(LAY+1,NPOINT);
+P=zeros(LAY+1,NPOINT);
+
+rw=10;
+%Eta=K(1)*10E-4;
+Eta=K(1)*10E-3;
+%E0=5.428807174868555*10E1;
+E0=K(2)*10E1;
+%E0=K(1);
+E1=K(3)*10E1;
+%E1=K(2);
+
+
+%E0=K(2)*10E1;
+%E1=K(3)*10E1;
+
+MU1=0;
+MU2=0;
+qF=10;
+%Eta=0.0000864;
+
+X = 0;
+Y = 0;
+
+for M=NUM1;
+    for N=NUM2;
+        for L=1:LAY+1
+            UF(L)=0;
+            VF(L)=0;
+            WF(L)=0;
+            PF(L)=0;
+        end
+        FAI=zeros(1,4.*(LAY+1));
+        
+        KM=M.*3.141592653589793/A;
+        KN=N.*3.141592653589793/B;
+        
+        for IT=1:NSTEP(i)
+            ET=E1/(1-exp(-Eta*IT*DT(i)));
+            Ez=E0*ET/(E0+ET);
+            
+            D1=Ez/((1+MU1)*(1-MU1-2*MU2*MU2))*(1-MU2*MU2);
+            D2=Ez/((1+MU1)*(1-MU1-2*MU2*MU2))*(MU1+MU2*MU2);
+            D3=Ez/((1+MU1)*(1-MU1-2*MU2*MU2))*MU2*(1+MU1);
+            D4=Ez/((1+MU1)*(1-MU1-2*MU2*MU2))*(1-MU1*MU1);
+            D5=Ez/(2*(1+MU1));
+            D6=Ez/(2*(1+MU2));
+            
+            Q=zeros(1,4.*(LAY+1));
+            GS=zeros(4*(LAY+1),4*(LAY+1));
+            
+            for L=1:LAY
+                
+                if (M~=0 && N~=0) 
+                    TT=A*B*DZ/4;
+                else if (M~=0|| N~=0)
+                        TT=2*A*B*DZ/4;
+                    else 
+                        TT=4*A*B*DZ/4;
+                    end
+                end
+            
+            
+            ES(1,1)=TT*(D1*KM*KM/3+D5*KN*KN/3+D6/(DZ*DZ)) ;
+            ES(1,2)=TT*(D2+D5)*KM*KN/3;
+            ES(1,3)=TT*(D3-D6)*KM/(2*DZ);
+            ES(1,4)=TT*KM/3;
+            
+            ES(1,5)=TT*(D1*KM*KM/6+D5*KN*KN/6-D6/(DZ*DZ));
+            ES(1,6)=TT*(D2+D5)*KM*KN/6;
+            ES(1,7)=-TT*(D3+D6)*KM/(2*DZ);
+            ES(1,8)=TT*KM/6;
+            
+            ES(2,1)=TT*(D2+D5)*KM*KN/3;
+            ES(2,2)=TT*(D5*KM*KM/3+D1*KN*KN/3+D6/(DZ*DZ));
+            ES(2,3)=TT*(D3-D6)*KN/(2*DZ);
+            ES(2,4)=TT*KN/3;
+            
+            ES(2,5)=TT*(D2+D5)*KM*KN/6;
+            ES(2,6)=TT*(D5*KM*KM/6+D1*KN*KN/6-D6/(DZ*DZ));
+            ES(2,7)=-TT*(D3+D6)*KN/(2*DZ);
+            ES(2,8)=TT*KN/6;
+            
+            %三行 
+            ES(3,1)=TT*(D3-D6)*KM/(2*DZ);
+            ES(3,2)=TT*(D3-D6)*KN/(2*DZ);
+            ES(3,3)=TT*(D6*KM*KM/3+D6*KN*KN/3+D4/(DZ*DZ));
+            ES(3,4)=TT/(2*DZ);
+            
+            ES(3,5)=TT*(D3+D6)*KM/(2*DZ);
+            ES(3,6)=TT*(D3+D6)*KN/(2*DZ);
+            ES(3,7)=TT*(D6*KM*KM/6+D6*KN*KN/6-D4/(DZ*DZ));
+            ES(3,8)=TT/(2*DZ);
+            
+            %  四行
+            ES(4,1)=TT*KM/3;
+            ES(4,2)=TT*KN/3;
+            ES(4,3)=TT/(2*DZ);
+            ES(4,4)=-TT*DT(i)*(KM*KM*KX+KN*KN*KY+3*KZ/(DZ*DZ))/(3*rw); 
+            
+            ES(4,5)=TT*KM/6;
+            ES(4,6)=TT*KN/6;
+            ES(4,7)=-TT/(2*DZ);
+            ES(4,8)=-TT*DT(i)*(KM*KM*KX+KN*KN*KY-6*KZ/(DZ*DZ))/(6*rw);
+            
+            %  五行
+            ES(5,1)=TT*(D1*KM*KM/6+D5*KN*KN/6-D6/(DZ*DZ));
+            ES(5,2)=TT*(D2+D5)*KM*KN/6;
+            ES(5,3)=TT*(D3+D6)*KM/(2*DZ);
+            ES(5,4)=TT*KM/6;
+	
+            ES(5,5)=TT*(D1*KM*KM/3+D5*KN*KN/3+D6/(DZ*DZ)) ;
+            ES(5,6)=TT*(D2+D5)*KM*KN/6;
+            ES(5,7)=-TT*(D3-D6)*KM/(2*DZ);
+            ES(5,8)=TT*KM/3;
+            
+            %  六行
+            ES(6,1)=TT*(D2+D5)*KM*KN/6;
+            ES(6,2)=TT*(D5*KM*KM/6+D1*KN*KN/6-D6/(DZ*DZ));
+            ES(6,3)=TT*(D3+D6)*KN/(2*DZ);
+            ES(6,4)=TT*KN/6;
+     
+            ES(6,5)=TT*(D2+D5)*KM*KN/3;
+            ES(6,6)=TT*(D5*KM*KM/3+D1*KN*KN/3+D6/(DZ*DZ));
+            ES(6,7)=-TT*(D3-D6)*KN/(2*DZ);
+            ES(6,8)=TT*KN/3;
+            
+            % 七行
+            ES(7,1)=-TT*(D3+D6)*KM/(2*DZ);
+            ES(7,2)=-TT*(D3+D6)*KN/(2*DZ);
+            ES(7,3)=TT*(D6*KM*KM/6+D6*KN*KN/6-D4/(DZ*DZ)) ;
+            ES(7,4)=-TT/(2*DZ);
+
+            ES(7,5)=-TT*(D3-D6)*KM/(2*DZ);
+            ES(7,6)=-TT*(D3-D6)*KN/(2*DZ);
+            ES(7,7)=TT*(D6*KM*KM/3+D6*KN*KN/3+D4/(DZ*DZ)) ;
+            ES(7,8)=-TT/(2*DZ);
+            
+            %  八行
+            ES(8,1)=TT*KM/6;
+            ES(8,2)=TT*KN/6;
+            ES(8,3)=TT/(2*DZ);
+            ES(8,4)=-TT*DT(i)*(KM*KM*KX+KN*KN*KY-6*KZ/(DZ*DZ))/(6*rw);
+%     *	-porosity*beta*TT*DZ/6
+	
+            ES(8,5)=TT*KM/3;
+            ES(8,6)=TT*KN/3;
+            ES(8,7)=-TT/(2*DZ);
+            ES(8,8)=-TT*DT(i)*(KM*KM*KX+KN*KN*KY+3*KZ/(DZ*DZ))/(3*rw);
+%       *	-porosity*beta*TT*DZ/3
+            
+            
+            EQ(1)=0;
+            EQ(2)=0;
+            EQ(3)=0;
+            EQ(4)=TT/DZ*(KM*DZ*UF(L)/3+KN*DZ*VF(L)/3+WF(L)/2 ...
+            +KM*DZ*UF(L+1)/6+KN*DZ*VF(L+1)/6-WF(L+1)/2);
+%     *	-PF(L)*porosity*beta*TT*DZ/3
+%     *    -PF(L+1)*porosity*beta*TT*DZ/6
+            EQ(5)=0;
+            EQ(6)=0;
+            EQ(7)=0;
+            EQ(8)=TT/DZ*(KM*DZ*UF(L)/6+KN*DZ*VF(L)/6+WF(L)/2 ...
+            +KM*DZ*UF(L+1)/3+KN*DZ*VF(L+1)/3-WF(L+1)/2);
+%     *	-PF(L)*porosity*beta*TT*DZ/6
+%     *    -PF(L+1)*porosity*beta*TT*DZ/3
+            
+            for I=1:8
+                Q((L-1)*4+I)=Q((L-1)*4+I)+EQ(I);
+                for J=1:8
+                    GS((L-1)*4+I,(L-1)*4+J)=GS((L-1)*4+I,(L-1)*4+J)+ES(I,J);
+                end
+            end
+            end
+            
+            for LI=1:4*LAY
+                for LJ=1:4*LAY
+                    Rgs(LI,LJ)=GS(LI,LJ);
+                    RQ(LI)=Q(LI);
+                end
+            end
+            
+                for LI=1:4*LAY
+                    Rgs(4,LI)=0;
+                    Rgs(LI,4)=0;
+                end
+                Rgs(4,4)=34656;
+                
+                if(M~=0 && N~=0) 
+	 	 
+                dibuky=-qF*(1/KM*(sin(KM*A)-sin(KM*0))) ...
+                    *(1/KN*(sin(KN*B)-sin(KN*0)))/(A/2)/(B/2);
+                end
+                
+                if(M~=0 && N==0)
+                dibuky=-qF*(1/KM*(sin(KM*A)-sin(KM*0)))/(A/2);
+                end
+                
+                if(M==0 && N~=0)
+	 	 
+                dibuky=-qF*(1/KN*(sin(KN*B)-sin(KN*0)))/(B/2);
+                end
+                
+                if(M==0 && N==0) 
+	 	  
+                dibuky=-qF*1;
+                end
+                
+                RQ(4*LAY-3)=RQ(4*LAY-3)-dibuky*GS(4*LAY-3,4*(LAY+1));
+                RQ(4*LAY-2)=RQ(4*LAY-2)-dibuky*GS(4*LAY-2,4*(LAY+1));
+                RQ(4*LAY-1)=RQ(4*LAY-1)-dibuky*GS(4*LAY-1,4*(LAY+1));
+                RQ(4*LAY)=RQ(4*LAY)-dibuky*GS(4*LAY,4*(LAY+1));
+                
+               RFAI=gauss_elim(Rgs,RQ);
+  %              RFAI=CM(Rgs,RQ);
+                
+                
+                for L=1:LAY
+                    UF(L)=RFAI((L-1)*4+1);
+                    VF(L)=RFAI((L-1)*4+2);
+                    WF(L)=RFAI((L-1)*4+3);
+                    PF(L)=RFAI((L-1)*4+4);
+                end
+                
+                UF(LAY+1)=0;
+                VF(LAY+1)=0;
+                WF(LAY+1)=0;
+                PF(LAY+1)=dibuky;
+                
+        end
+        
+        for I=1:NPOINT 
+            for L=1:LAY+1
+                U(L,I)=U(L,I)+sin(KM*X(I))*cos(KN*Y(I))*UF(L);
+                V(L,I)=V(L,I)+cos(KM*X(I))*sin(KN*Y(I))*VF(L);
+                W(L,I)=W(L,I)+cos(KM*X(I))*cos(KN*Y(I))*WF(L);
+                P(L,I)=P(L,I)+cos(KM*X(I))*cos(KN*Y(I))*PF(L);
+            end
+        end
+    end
+end
+a(1:11,i)=W;
+ans=a(5,:);
+ANS=ans';
+end
+%profile viewer
+
+
 
