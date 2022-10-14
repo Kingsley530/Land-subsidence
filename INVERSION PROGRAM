@@ -1,0 +1,26 @@
+% initial values of K
+%profile on
+tic;
+global Ob s
+Ob=csvread('地面沉降数列2.xls');
+%Ob=csvread('地面沉降.xls');
+
+s=1.0;
+while s>=0.1
+    s=s-0.1
+if x==[0.2;4;4];
+    x0=[0.2;4;4];
+else
+   x0=x;
+end
+% A=[1 1 1];
+% B=[30];
+ 
+L=[0;0;0];
+U=[2;6;6];
+
+[x,fval,exitflag]=fmincon('fanyanbxcs',x0,[],[],[],[],L,U)
+end
+t1=toc;
+display(strcat('反演程序运算时间',num2str(t1),'秒'))
+%profile viewer
